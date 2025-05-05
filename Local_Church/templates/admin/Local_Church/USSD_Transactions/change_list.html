@@ -1,0 +1,10 @@
+{% extends "admin/change_list.html" %}
+{% block content %}
+    {% if total_filtered and total_all %}
+        <div style="padding: 10px; background-color: #eef9f0; border: 1px solid #b2dfdb; margin-bottom: 15px; font-size: 16px;">
+            <strong>💰 Filtered Total:</strong> {{ total_filtered|floatformat:2 }} |
+            <strong>All Transactions Total:</strong> {{ total_all|floatformat:2 }}
+        </div>
+    {% endif %}
+    {{ block.super }}
+{% endblock %}
