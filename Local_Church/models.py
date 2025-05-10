@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import date
+from datetime import datetime
 from django.utils import timezone
 import math
 
@@ -10,6 +11,20 @@ from openpyxl.xml import defusedxml_available
 # Create your models here.
 
 class Cash_Transactions(models.Model):
+    CHURCH_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    church_name = models.CharField(max_length=100, default="unknown", choices=CHURCH_NAME_CHOICES)
+
+    SECTION_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    section_name = models.CharField(max_length=100, default="MURANGÁ SECTION")
+
+    DISTRICT_NAME_CHOICES = [
+        ('MT. KENYA WEST DISTRICT', 'Murangá Church')
+    ]
+    district_name = models.CharField(max_length=100, default="MT. KENYA WEST DISTRICT")
     date = models.DateField(default=date.today)
     week_of_month = models.PositiveIntegerField(blank=True, null=True)
     Tithe = models.DecimalField(max_digits=10, decimal_places=2)
@@ -46,7 +61,20 @@ class Cash_Transactions(models.Model):
 
 class Plot_Buying(models.Model):
     date = models.DateField(default=date.today)
+    CHURCH_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    church_name = models.CharField(max_length=100,default="Unknown", choices=CHURCH_NAME_CHOICES)
 
+    SECTION_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    section_name = models.CharField(max_length=100, default="MURANGÁ SECTION")
+
+    DISTRICT_NAME_CHOICES = [
+        ('MT. KENYA WEST DISTRICT', 'Murangá Church')
+    ]
+    district_name = models.CharField(max_length=100, default="MT. KENYA WEST DISTRICT")
     Amount = models.DecimalField(max_digits=10, decimal_places=2)
 
 
@@ -63,8 +91,20 @@ class Plot_Buying(models.Model):
 class Mission_Offering(models.Model):
     date = models.DateField(default=date.today)
     Amount = models.DecimalField(max_digits=10, decimal_places=2)
+    CHURCH_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    church_name = models.CharField(max_length=100, default="unknown",choices=CHURCH_NAME_CHOICES)
 
+    SECTION_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    section_name = models.CharField(max_length=100, default="MURANGÁ SECTION")
 
+    DISTRICT_NAME_CHOICES = [
+        ('MT. KENYA WEST DISTRICT', 'Murangá Church')
+    ]
+    district_name = models.CharField(max_length=100, default="MT. KENYA WEST DISTRICT")
     def __str__(self):
         # return f"Date: {self.date}, Week of the Month: {self.week_of_month}"
         month_name = self.date.strftime('%B')  # E.g., April
@@ -77,7 +117,20 @@ class Big_Day(models.Model):
     date = models.DateField(default=date.today)
     week_of_month = models.PositiveIntegerField(blank=True, null=True)
     Amount = models.DecimalField(max_digits=10, decimal_places=2)
+    CHURCH_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    church_name = models.CharField(max_length=100, default="unknown",choices=CHURCH_NAME_CHOICES)
 
+    SECTION_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    section_name = models.CharField(max_length=100, default="MURANGÁ SECTION")
+
+    DISTRICT_NAME_CHOICES = [
+        ('MT. KENYA WEST DISTRICT', 'Murangá Church')
+    ]
+    district_name = models.CharField(max_length=100, default="MT. KENYA WEST DISTRICT")
 
 
     def __str__(self):
@@ -98,6 +151,20 @@ class USSD_Transactions (models.Model):
     Amount = models.DecimalField(max_digits=10, decimal_places=2)
     Month = models.CharField(max_length=20)
     Timestamp = models.DateTimeField(auto_now_add=True)
+    CHURCH_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    church_name = models.CharField(max_length=100,default="unknown", choices=CHURCH_NAME_CHOICES)
+
+    SECTION_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    section_name = models.CharField(max_length=100, default="MURANGÁ SECTION")
+
+    DISTRICT_NAME_CHOICES = [
+        ('MT. KENYA WEST DISTRICT', 'Murangá Church')
+    ]
+    district_name = models.CharField(max_length=100, default="MT. KENYA WEST DISTRICT")
 
     def save(self, *args, **kwargs):
         # Calculate the week of the month before saving
@@ -133,6 +200,20 @@ class Attendance (models.Model):
       Teens = models.IntegerField(default=0)
       Children = models.IntegerField(default=0)
 
+      CHURCH_NAME_CHOICES = [
+          ('Murangá Church', 'Murangá Church')
+      ]
+      church_name = models.CharField(max_length=100, default="unknown",choices=CHURCH_NAME_CHOICES)
+
+      SECTION_NAME_CHOICES = [
+          ('Murangá Church', 'Murangá Church')
+      ]
+      section_name = models.CharField(max_length=100, default="MURANGÁ SECTION")
+
+      DISTRICT_NAME_CHOICES = [
+          ('MT. KENYA WEST DISTRICT', 'Murangá Church')
+      ]
+      district_name = models.CharField(max_length=100, default="MT. KENYA WEST DISTRICT")
 
       def save(self, *args, **kwargs):
           # Calculate the week of the month before saving
@@ -166,6 +247,20 @@ class Visitors(models.Model):
     Area_of_residence = models.CharField(max_length=100)
     Reason_for_visit = models.CharField(max_length=100, blank=True, null=True)
     Fellowship_again = models.BooleanField()
+    CHURCH_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    church_name = models.CharField(max_length=100, default="unknown", choices=CHURCH_NAME_CHOICES)
+
+    SECTION_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    section_name = models.CharField(max_length=100, default="MURANGÁ SECTION")
+
+    DISTRICT_NAME_CHOICES = [
+        ('MT. KENYA WEST DISTRICT', 'Murangá Church')
+    ]
+    district_name = models.CharField(max_length=100, default="MT. KENYA WEST DISTRICT")
 
     def save(self, *args, **kwargs):
         # Automatically calculate week of month
@@ -216,40 +311,86 @@ class Visitors(models.Model):
 #         return f"{self.title} ({self.report_type}) - {self.generated_on.strftime('%Y-%m-%d')}"
 
 
-
+# models.py
 class Report(models.Model):
-    month = models.CharField(max_length=20, default="May" )
-    year = models.PositiveIntegerField(default=now().year)
+    MONTH_CHOICES = [
+        ('January', 'January'), ('February', 'February'), ('March', 'March'),
+        ('April', 'April'), ('May', 'May'), ('June', 'June'),
+        ('July', 'July'), ('August', 'August'), ('September', 'September'),
+        ('October', 'October'), ('November', 'November'), ('December', 'December')
+    ]
 
-    church_name = models.CharField(max_length=100, default="Murangá")
-    section_name = models.CharField(max_length=100,default="Murangá")
-    district_name = models.CharField(max_length=100, default= "Mt. Kenya West")
+    month = models.CharField(max_length=20, choices=MONTH_CHOICES)
+    year = models.PositiveIntegerField(default=datetime.now().year)
+
+
+
+    CHURCH_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    church_name = models.CharField(max_length=100, default="unknown", choices=CHURCH_NAME_CHOICES)
+
+    SECTION_NAME_CHOICES = [
+        ('Murangá Church', 'Murangá Church')
+    ]
+    section_name = models.CharField(max_length=100, default="MURANGÁ SECTION")
+
+    DISTRICT_NAME_CHOICES = [
+        ('MT. KENYA WEST DISTRICT', 'Murangá Church')
+    ]
+    district_name = models.CharField(max_length=100, default="MT. KENYA WEST DISTRICT")
 
     # Attendance
     attendance_men = models.PositiveIntegerField(default=0)
     attendance_women = models.PositiveIntegerField(default=0)
     attendance_youth = models.PositiveIntegerField(default=0)
+    attendance_teens = models.PositiveIntegerField(default=0)
     attendance_children = models.PositiveIntegerField(default=0)
+    total_visitors = models.PositiveIntegerField(default=0)
 
-    # Giving
-    tithes = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    offerings = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    missions = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    other_givings = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-
-    # Generated totals
+    # Financials
+    tithes = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    offerings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    youth_offerings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    children_offerings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    missions = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
+    other_givings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     total_givings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
 
-    # Optional notes and approvals
-    signature_local_church = models.CharField(max_length=100, blank=True, null=True)
-    signature_section = models.CharField(max_length=100, blank=True, null=True)
-    pastor_name = models.CharField(max_length=100, blank=True, null=True)
+    APPROVIE_NAME_CHOICES = [
+        ('Bishop Ben Irungu', 'Bishop Ben Irungu')
+    ]
 
+    # Metadata
     generated_on = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+    is_approved = models.BooleanField(default=False,)
+    approved_by = models.CharField(max_length=100, blank=True, null=True, default="Bishop Ben Irungu")
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        unique_together = ('month', 'year', 'church_name')
+        ordering = ['-year', '-month']
 
     def __str__(self):
-        return f"Report - {self.month} {self.year} ({self.church_name})"
+        return f"{self.church_name} - {self.month} {self.year} Report"
 
     def calculate_total_givings(self):
-        self.total_givings = self.tithes + self.offerings + self.missions + self.other_givings
+        self.total_givings = (
+                self.tithes +
+                self.offerings +
+                self.youth_offerings +
+                self.children_offerings +
+                self.missions +
+                self.other_givings
+        )
         self.save()
+
+    def get_attendance_total(self):
+        return (
+                self.attendance_men +
+                self.attendance_women +
+                self.attendance_youth +
+                self.attendance_teens +
+                self.attendance_children
+        )

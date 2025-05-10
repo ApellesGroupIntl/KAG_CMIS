@@ -1,54 +1,49 @@
-# local_church/views.py
-
-from django.shortcuts import render
-from datetime import datetime
-from django.db.models import Sum
-from .models import Report, Attendance, Cash_Transactions  # or Giving
-from django.shortcuts import render, get_object_or_404
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from .models import Report
+from .forms import ReportFilterForm
+from .utils import generate_monthly_report
 
-def monthly_report_view(request, report_id):
-    report = get_object_or_404(Report, id=report_id)
-    return render(request, 'local_church/monthly_report.html', {'report': report})
 
-def generate_monthly_report(request, month, year):
-    # Convert month name to number if needed
-    month_int = datetime.strptime(month, "%B").month
-    start_date = datetime(year, month_int, 1)
-    if month_int == 12:
-        end_date = datetime(year + 1, 1, 1)
-    else:
-        end_date = datetime(year, month_int + 1, 1)
+@login_required
+def report_list(request):
+    form = ReportFilterForm(request.GET or None)
+    reports = Report.objects.all()
 
-    # Attendance Summary
-    attendances = Attendance.objects.filter(date__range=(start_date, end_date))
-    total_men = attendances.aggregate(Sum('men'))['men__sum'] or 0
-    total_women = attendances.aggregate(Sum('women'))['women__sum'] or 0
-    total_children = attendances.aggregate(Sum('children'))['children__sum'] or 0
-    total_attendance = total_men + total_women + total_children
+    if form.is_valid():
+        church = form.cleaned_data.get('church')
+        month = form.cleaned_data.get('month')
+        year = form.cleaned_data.get('year')
 
-    # Giving Summary
-    transactions = Cash_Transactions.objects.filter(date__range=(start_date, end_date))
-    tithe = transactions.filter(Txn_type='Tithe').aggregate(Sum('Amount'))['Amount__sum'] or 0
-    offering = transactions.filter(Txn_type='Offering').aggregate(Sum('Amount'))['Amount__sum'] or 0
-    other_giving = transactions.exclude(Txn_type__in=['Tithe', 'Offering']).aggregate(Sum('Amount'))['Amount__sum'] or 0
-    total_giving = tithe + offering + other_giving
+        if church:
+            reports = reports.filter(church_name=church)
+        if month:
+            reports = reports.filter(month=month)
+        if year:
+            reports = reports.filter(year=year)
 
-    # Save report (optional or just render it)
-    report = Report.objects.create(
-        month=month,
-        year=year,
-        total_men=total_men,
-        total_women=total_women,
-        total_children=total_children,
-        total_attendance=total_attendance,
-        tithe_amount=tithe,
-        offering_amount=offering,
-        other_giving=other_giving,
-        total_giving=total_giving,
-    )
+    context = {
+        'reports': reports,
+        'form': form,
+    }
+    return render(request, 'reports/list.html', context)
 
-    return render(request, 'reports/monthly_report.html', {'report': report})
-from django.shortcuts import render
 
-# Create your views here.
+@login_required
+def report_detail(request, pk):
+    report = Report.objects.get(pk=pk)
+    return render(request, 'reports/detail.html', {'report': report})
+
+
+@login_required
+def generate_report(request):
+    if request.method == 'POST':
+        church = request.POST.get('church')
+        month = int(request.POST.get('month'))
+        year = int(request.POST.get('year'))
+
+        report = generate_monthly_report(church, month, year)
+        return redirect('report_detail', pk=report.pk)
+
+    return render(request, 'reports/generate.html')

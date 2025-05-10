@@ -3,14 +3,95 @@ from django.db.models import Sum
 from django.utils.html import format_html
 from django.contrib import messages
 from .models import USSD_Transactions, Attendance, Cash_Transactions, Plot_Buying, Mission_Offering, Big_Day, Report, Visitors  # or whatever model you created
-
+from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
+from .models import Report
+from .utils import generate_monthly_report
+from datetime import datetime
 # admin.site.register(USSD_Transactions)
+
+
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
-    list_display = ('church_name', 'tithes', 'offerings', 'missions', 'total_givings', 'pastor_name', 'generated_on')
-    list_filter = ('church_name', 'generated_on')
-    search_fields = ('church_name', 'total_givings')
-    ordering = ('-generated_on',)
+    list_display = (
+        'church_name',
+        'month_year',
+        'attendance_summary',
+        'financial_summary',
+        'is_approved',
+        'generated_on'
+    )
+    list_filter = ('church_name', 'month', 'year', 'is_approved')
+    search_fields = ('church_name', 'month', 'year', 'notes')
+    actions = ['generate_reports', 'approve_reports']
+    readonly_fields = ('generated_on', 'last_updated')
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('month', 'year', 'church_name', 'section_name', 'district_name')
+        }),
+        ('Attendance', {
+            'fields': (
+                'attendance_men',
+                'attendance_women',
+                'attendance_youth',
+                'attendance_teens',
+                'attendance_children',
+                'total_visitors'
+            )
+        }),
+        ('Financials', {
+            'fields': (
+                'tithes',
+                'offerings',
+                'youth_offerings',
+                'children_offerings',
+                'missions',
+                'other_givings',
+                'total_givings'
+            )
+        }),
+        ('Approval', {
+            'fields': ('is_approved', 'approved_by', 'notes')
+        }),
+        ('Metadata', {
+            'fields': ('generated_on', 'last_updated')
+        }),
+    )
+
+    def month_year(self, obj):
+        return f"{obj.month} {obj.year}"
+
+    month_year.short_description = 'Period'
+
+    def attendance_summary(self, obj):
+        return f"M: {obj.attendance_men} | W: {obj.attendance_women} | Y: {obj.attendance_youth}"
+
+    attendance_summary.short_description = 'Attendance'
+
+    def financial_summary(self, obj):
+        return f"Total: {obj.total_givings}"
+
+    financial_summary.short_description = 'Finances'
+
+    def generate_reports(self, request, queryset):
+        for report in queryset:
+            # Regenerate report data
+            generate_monthly_report(
+                report.church_name,
+                datetime.strptime(report.month, "%B").month,
+                report.year
+            )
+        self.message_user(request, "Selected reports have been regenerated.")
+
+    generate_reports.short_description = "Regenerate selected reports"
+
+    def approve_reports(self, request, queryset):
+        updated = queryset.update(is_approved=True, approved_by=request.user.get_full_name())
+        self.message_user(request, f"{updated} reports have been approved.")
+
+    approve_reports.short_description = "Approve selected reports"
 
 class USSD_TransactionsAdmin(admin.ModelAdmin):
     list_display = ['date', 'week_of_month', 'Txn_code', 'Phone_number', 'Txn_type', 'Amount', 'Month', 'Timestamp' ]
