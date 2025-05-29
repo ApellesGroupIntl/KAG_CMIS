@@ -6,6 +6,8 @@ from .forms import ReportFilterForm
 from .utils import generate_monthly_report
 
 
+
+
 @login_required
 def report_list(request):
     form = ReportFilterForm(request.GET or None)

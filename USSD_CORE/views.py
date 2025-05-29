@@ -5,6 +5,11 @@ from datetime import datetime
 from django.utils import timezone
 import random
 import string
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from datetime import datetime
+from .models import UssdUser
+
 
 def get_current_month():
     return datetime.now().strftime("%B")
@@ -35,6 +40,63 @@ def get_transaction_type(menu_level, sub_choice):
             "6": "Bishop's Day"
         }.get(sub_choice, "Big Day Giving")
     return ""
+
+
+@csrf_exempt
+def ussd_registration_view(request):
+    session_id = request.POST.get("sessionId", "")
+    service_code = request.POST.get("serviceCode", "")
+    phone_number = request.POST.get("phoneNumber", "")
+    text = request.POST.get("text", "")
+
+    inputs = text.split("*") if text else []
+
+    # Step 0 - Welcome message
+    if not inputs or inputs[0] == "":
+        return JsonResponse({
+                                "response": "CON Good Morning. This is DMMC Thika.\nIt is time to give and have a blessing time\n1) Register\n2) Proceed without registering"})
+
+    # Step 1 - Register or proceed
+    if inputs[0] == "1":
+        if len(inputs) == 1:
+            return JsonResponse(
+                {"response": "CON Read the Terms and Conditions. www.terms.com\n1) I have read and agreed\n2) Decline"})
+
+        if inputs[1] == "1":
+            if len(inputs) == 2:
+                return JsonResponse({"response": "CON Please enter your full name:"})
+            elif len(inputs) == 3:
+                return JsonResponse({"response": "CON Enter your Date of Birth (DD/MM/YYYY):"})
+            elif len(inputs) == 4:
+                name = inputs[2]
+                dob = inputs[3]
+                return JsonResponse({
+                                        "response": f"CON Please confirm this details:\nName: {name}\nPhone Number: {phone_number}\nDOB: {dob}\n1) Confirm\n2) Edit"})
+            elif len(inputs) == 5:
+                if inputs[4] == "1":
+                    name = inputs[2]
+                    dob_str = inputs[3]
+                    try:
+                        dob = datetime.strptime(dob_str, "%d/%m/%Y").date()
+                        user, created = UssdUser.objects.get_or_create(phone_number=phone_number,
+                                                                       defaults={"name": name, "dob": dob})
+                        if not created:
+                            return JsonResponse({"response": "END You are already registered. Thank you!"})
+                        return JsonResponse({
+                                                "response": f"END Dear {name.upper()}, you have been successfully registered to our DMMC THIKA. Expect a blessing as you give."})
+                    except ValueError:
+                        return JsonResponse({"response": "END Invalid date format. Please use DD/MM/YYYY."})
+                else:
+                    return JsonResponse({"response": "END Registration cancelled. You can dial again to try."})
+
+        else:
+            return JsonResponse({"response": "END You must agree to the terms to continue."})
+
+    elif inputs[0] == "2":
+        return JsonResponse({"response": "END Proceeding without registration. Thank you."})
+
+    return JsonResponse({"response": "END Invalid input. Please dial again."})
+
 
 @csrf_exempt
 def ussd_callback(request):

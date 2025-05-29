@@ -365,7 +365,7 @@ class Report(models.Model):
     generated_on = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     is_approved = models.BooleanField(default=False,)
-    approved_by = models.CharField(max_length=100, blank=True, null=True, default="Bishop Ben Irungu")
+    approved_by = models.CharField(max_length=100, choices=APPROVIE_NAME_CHOICES, null=True, default="Bishop Ben Irungu")
     notes = models.TextField(blank=True, null=True)
 
     class Meta:

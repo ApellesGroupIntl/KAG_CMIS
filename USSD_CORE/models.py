@@ -2,6 +2,14 @@ from django.db import models
 from datetime import date
 import math
 
+class UssdUser(models.Model):
+    name = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=15, unique=True)
+    dob = models.DateField()
+    registered_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.phone_number})"
 
 class Transactions(models.Model):
     date = models.DateField(default=date.today)
