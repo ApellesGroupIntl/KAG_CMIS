@@ -294,9 +294,9 @@ def ussd_callback_section(request):
     # OFFERING FLOW
     elif text.startswith("1"):
         if len(user_responses) == 1:
-            return HttpResponse("CON Choose Offering Type\n1. Sunday School Service\n2. Main Offering\n00. Back", content_type="text/plain")
+            return HttpResponse("CON Choose Offering Type\n1. Sunday School Offering\n2. Main Offering\n00. Back", content_type="text/plain")
         elif len(user_responses) == 2:
-            return HttpResponse("CON Enter Amount (e.g., 500)\n00. Back", content_type="text/plain")
+            return HttpResponse("CON Enter Amount (e.g, 500)\n00. Back", content_type="text/plain")
         elif len(user_responses) == 3:
             amount = user_responses[2]
             if not validate_amount(amount):
@@ -365,7 +365,7 @@ def ussd_callback_section(request):
     # ATTENDANCE FLOW
     elif text.startswith("4"):
         if len(user_responses) == 1:
-            return HttpResponse("CON Enter Amount for Plot Support (e.g., 500)\n00. Back", content_type="text/plain")
+            return HttpResponse("CON Enter Amount for Plot Buying Support (e.g., 500)\n00. Back", content_type="text/plain")
         elif len(user_responses) == 2:
             amount = user_responses[1]
             if not validate_amount(amount):

@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from USSD_CORE.models import Transactions
 from Local_Church.models import USSD_Transactions
+from Section.models import Transactions
 
 class Command(BaseCommand):
     help = "Sync all USSD_CORE transactions to local_church"

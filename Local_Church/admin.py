@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db.models import Sum
 from django.utils.html import format_html
 from django.contrib import messages
-from .models import USSD_Transactions, Attendance, Cash_Transactions, Plot_Buying, Mission_Offering, Big_Day, Report, Visitors  # or whatever model you created
+from .models import USSD_Transactions, Attendance, Cash_Transactions, Expenses, Plot_Buying, Mission_Offering, Big_Day, Report, Missions, Visitors  # or whatever model you created
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
@@ -95,7 +95,7 @@ class ReportAdmin(admin.ModelAdmin):
 
 class USSD_TransactionsAdmin(admin.ModelAdmin):
     list_display = ['date', 'week_of_month', 'Txn_code', 'Phone_number', 'Txn_type', 'Amount', 'Month', 'Timestamp' ]
-    search_fields = ['Txn_type', 'week_of_month', 'Txn_code', 'Phone_number']
+    search_fields = ['Txn_type', 'week_of_month', 'Txn_code', 'Phone_number', 'Month']
     list_filter = ['Txn_type', 'week_of_month']
 
     def changelist_view(self, request, extra_context=None):
@@ -124,8 +124,8 @@ admin.site.register(USSD_Transactions, USSD_TransactionsAdmin)
 
 class Cash_TransactionAdmin(admin.ModelAdmin):
     list_display = ['date', 'week_of_month', 'Tithe', 'Main_Service_Offering', 'Mid_Week_Service_Offering', 'Children_Offering', 'Youths_Offering', 'Teens_Offering']
-    search_fields = ['date', 'week_of_month', 'Main_Service_Offering', 'Mid_Week_Service_Offering']
-    list_filter = ['date', 'week_of_month']
+    search_fields = ['date', 'week_of_month', 'Main_Service_Offering', 'Mid_Week_Service_Offering', 'Tithe']
+    list_filter = ['date', 'week_of_month', ]
 admin.site.register(Cash_Transactions, Cash_TransactionAdmin)
 
 class Plot_BuyingAdmin(admin.ModelAdmin):
@@ -140,16 +140,33 @@ class Mission_OfferingAdmin(admin.ModelAdmin):
     list_filter = ['date']
 admin.site.register(Mission_Offering, Mission_OfferingAdmin)
 
+class MissionsAdmin(admin.ModelAdmin):
+    list_display = ['date', "KAGDOM_Contribution", "District_Mission_Contribution", "Monthly_Support", "Missionary_Name", "Total_amount"]
+    search_fields = ['KAGDOM_Contribution', "District_Mission_Contribution", "Monthly_Support", "Missionary_Name"]
+
+admin.site.register(Missions, MissionsAdmin)
+
+
 class Big_DayAdmin(admin.ModelAdmin):
-    list_display = ['date', 'Amount']
+    list_display = ['date', 'Big_Day', 'week_of_month','Amount']
     search_fields = ['date', 'Amount']
-    list_filter = ['date']
+    list_filter = ['date', 'Big_Day', 'week_of_month']
 admin.site.register(Big_Day, Big_DayAdmin)
+
+
+class ExpensesAdmin(admin.ModelAdmin):
+    list_display = ['date', 'week_of_month', 'Expense_Name', 'Expense_Amount', 'Expense_Approved']
+    search_fields = ['date', 'week_of_month', 'Expense_Name']
+    list_filter = ['date', 'week_of_month', 'Expense_Name', 'Expense_Amount', 'Expense_Approved']
+
+# Register the model with the admin site
+admin.site.register(Expenses, ExpensesAdmin)
+
 
 class AttendanceAdmin(admin.ModelAdmin):
     list_display = ['date', 'week_of_month', 'Children', 'Teens', 'Youths', 'Ladies', 'Men']
     search_fields = ['date', 'week_of_month']
-    list_filter = ['date']
+    list_filter = ['date', 'week_of_month', 'Children', 'Teens', 'Youths', 'Ladies', 'Men']
 
 # Register the model with the admin site
 admin.site.register(Attendance, AttendanceAdmin)
