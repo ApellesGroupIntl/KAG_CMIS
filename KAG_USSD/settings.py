@@ -25,12 +25,18 @@ SECRET_KEY = 'django-insecure-+tm6qt&07eil&lvoolvt@le5awj$+2vs+%-27c$)*v#7t1bc8q
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['https://55e0-41-139-219-203.ngrok-free.app', '*']
+ALLOWED_HOSTS = [ "33f0-217-199-148-234.ngrok-free.app", "*",'*', "127.0.0.1",
+    "localhost"]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://33f0-217-199-148-234.ngrok-free.app"
+]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    #'Users'
     'Local_Church',
     'Section',
     'District',
@@ -87,7 +93,7 @@ DATABASES = {
     'ENGINE': 'django.db.backends.sqlite3',
     'NAME': BASE_DIR / 'backup_db.sqlite3',
 },
-}
+    }
 
 
 # Password validation
@@ -164,4 +170,6 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 #DATABASE_ROUTERS = ['Local_Church.routers.DatabaseRouter']
+
+#AUTH_USER_MODEL = 'Users.CustomUser'
 

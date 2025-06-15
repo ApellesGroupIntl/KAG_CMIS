@@ -2,6 +2,14 @@ from django.db import models
 from datetime import date
 import math
 
+class UssdUser(models.Model):
+    name = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=15, unique=True)
+    dob = models.DateField()
+    registered_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.phone_number})"
 
 class Transactions(models.Model):
     date = models.DateField(default=date.today)
@@ -12,8 +20,8 @@ class Transactions(models.Model):
     Amount = models.DecimalField(max_digits=10, decimal_places=2)
     Month = models.CharField(max_length=20)
     Timestamp = models.DateTimeField(auto_now_add=True)
-
-    
+    church_name = models.CharField(max_length=255, null=True, blank=True, default="Murangá Church")
+    source = models.CharField(max_length=20, blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.week_of_month:
@@ -32,7 +40,7 @@ class Transactions(models.Model):
         month_name = self.date.strftime('%B, %Y')  # E.g., April, 2025
         return (
             f"[{month_name} - Week {self.week_of_month}] "
-            f"{self.Txn_code} | {self.Phone_number} | {self.Txn_type} | "
+            f"{self.Txn_code} |{self.church_name} | {self.Phone_number} | {self.Txn_type} | "
             f"{self.Amount} | {self.Month} | {self.Timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
         )
 
