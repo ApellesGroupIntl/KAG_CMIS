@@ -195,7 +195,7 @@ class USSD_Transactions (models.Model):
     CHURCH_NAME_CHOICES = [
         ('Murangá Church', 'Murangá Church')
     ]
-    church_name = models.CharField(max_length=100,default="unknown", choices=CHURCH_NAME_CHOICES)
+    church_name = models.CharField(max_length=100, choices=CHURCH_NAME_CHOICES)
 
     SECTION_NAME_CHOICES = [
         ('Murangá Church', 'Murangá Church')
@@ -206,6 +206,7 @@ class USSD_Transactions (models.Model):
         ('MT. KENYA WEST DISTRICT', 'Murangá Church')
     ]
     district_name = models.CharField(max_length=100, default="MT. KENYA WEST DISTRICT")
+    source = models.CharField(max_length=20, default="local")
 
     def save(self, *args, **kwargs):
         # Calculate the week of the month before saving
@@ -376,26 +377,6 @@ class Expenses(models.Model):
          month_name = self.date.strftime('%B, %Y')
          return f"Week of the Month ({month_name}): {self.week_of_month} {self.Expense_Name} ({self.Expense_Amount}) "
 
-# class Report(models.Model):
-#     REPORT_TYPE_CHOICES = [
-#         ('weekly', 'Weekly'),
-#         ('monthly', 'Monthly'),
-#     ]
-#
-#     title = models.CharField(max_length=100)
-#     report_type = models.CharField(max_length=10, choices=REPORT_TYPE_CHOICES)
-#     start_date = models.DateField()
-#     end_date = models.DateField()
-#     total_transactions = models.PositiveIntegerField()
-#     total_amount = models.DecimalField(max_digits=12, decimal_places=2)
-#     generated_on = models.DateTimeField(auto_now_add=True)
-#     notes = models.TextField(blank=True, null=True)
-#
-#     def __str__(self):
-#         return f"{self.title} ({self.report_type}) - {self.generated_on.strftime('%Y-%m-%d')}"
-
-
-# models.py
 class Report(models.Model):
     MONTH_CHOICES = [
         ('January', 'January'), ('February', 'February'), ('March', 'March'),
@@ -404,53 +385,53 @@ class Report(models.Model):
         ('October', 'October'), ('November', 'November'), ('December', 'December')
     ]
 
-    month = models.CharField(max_length=20, choices=MONTH_CHOICES)
-    year = models.PositiveIntegerField(default=datetime.now().year)
-
-
-
     CHURCH_NAME_CHOICES = [
         ('Murangá Church', 'Murangá Church')
     ]
-    church_name = models.CharField(max_length=100, default="unknown", choices=CHURCH_NAME_CHOICES)
 
     SECTION_NAME_CHOICES = [
         ('Murangá Church', 'Murangá Church')
     ]
-    section_name = models.CharField(max_length=100, default="MURANGÁ SECTION")
 
     DISTRICT_NAME_CHOICES = [
         ('MT. KENYA WEST DISTRICT', 'Murangá Church')
     ]
-    district_name = models.CharField(max_length=100, default="MT. KENYA WEST DISTRICT")
-
-    # Attendance
-    attendance_men = models.PositiveIntegerField(default=0)
-    attendance_women = models.PositiveIntegerField(default=0)
-    attendance_youth = models.PositiveIntegerField(default=0)
-    attendance_teens = models.PositiveIntegerField(default=0)
-    attendance_children = models.PositiveIntegerField(default=0)
-    total_visitors = models.PositiveIntegerField(default=0)
-
-    # Financials
-    tithes = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    offerings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    youth_offerings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    children_offerings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    missions = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    other_givings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
-    total_givings = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
 
     APPROVIE_NAME_CHOICES = [
         ('Bishop Ben Irungu', 'Bishop Ben Irungu')
     ]
 
-    # Metadata
-    generated_on = models.DateTimeField(auto_now_add=True)
-    last_updated = models.DateTimeField(auto_now=True)
-    is_approved = models.BooleanField(default=False,)
+    # Basic Info
+    month = models.CharField(max_length=20, choices=MONTH_CHOICES)
+    year = models.PositiveIntegerField(default=datetime.now().year)
+    church_name = models.CharField(max_length=100, choices=CHURCH_NAME_CHOICES, default="unknown")
+    section_name = models.CharField(max_length=100, choices=SECTION_NAME_CHOICES, default="MURANGÁ SECTION")
+    district_name = models.CharField(max_length=100, choices=DISTRICT_NAME_CHOICES, default="MT. KENYA WEST DISTRICT")
+
+    # Attendance
+    attendance_Men = models.PositiveIntegerField(default=0)
+    attendance_Women = models.PositiveIntegerField(default=0)
+    attendance_Youth = models.PositiveIntegerField(default=0)
+    attendance_Teens = models.PositiveIntegerField(default=0)
+    attendance_Children = models.PositiveIntegerField(default=0)
+    total_Visitors = models.PositiveIntegerField(default=0)
+
+    # Financials
+    Tithes = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    Offerings = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    Youth_Offerings = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    Children_Offerings = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    Missions = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    other_givings = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    total_givings = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Meta Info
+    is_approved = models.BooleanField(default=False)
     approved_by = models.CharField(max_length=100, choices=APPROVIE_NAME_CHOICES, null=True, default="Bishop Ben Irungu")
     notes = models.TextField(blank=True, null=True)
+    generated_on = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ('month', 'year', 'church_name')
@@ -461,20 +442,20 @@ class Report(models.Model):
 
     def calculate_total_givings(self):
         self.total_givings = (
-                self.tithes +
-                self.offerings +
-                self.youth_offerings +
-                self.children_offerings +
-                self.missions +
-                self.other_givings
+            self.Tithes +
+            self.Offerings +
+            self.Youth_Offerings +
+            self.Children_Offerings +
+            self.Missions +
+            self.other_givings
         )
         self.save()
 
     def get_attendance_total(self):
         return (
-                self.attendance_men +
-                self.attendance_women +
-                self.attendance_youth +
-                self.attendance_teens +
-                self.attendance_children
+            self.attendance_Men +
+            self.attendance_Women +
+            self.attendance_Youth +
+            self.attendance_Teens +
+            self.attendance_Children
         )

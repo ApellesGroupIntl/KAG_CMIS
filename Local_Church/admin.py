@@ -33,21 +33,21 @@ class ReportAdmin(admin.ModelAdmin):
         }),
         ('Attendance', {
             'fields': (
-                'attendance_men',
-                'attendance_women',
-                'attendance_youth',
-                'attendance_teens',
-                'attendance_children',
-                'total_visitors'
+                'attendance_Men',
+                'attendance_Women',
+                'attendance_Youth',
+                'attendance_Teens',
+                'attendance_Children',
+                'total_Visitors'
             )
         }),
         ('Financials', {
             'fields': (
-                'tithes',
-                'offerings',
-                'youth_offerings',
-                'children_offerings',
-                'missions',
+                'Tithes',
+                'Offerings',
+                'Youth_Offerings',
+                'Children_Offerings',
+                'Missions',
                 'other_givings',
                 'total_givings'
             )
@@ -62,36 +62,31 @@ class ReportAdmin(admin.ModelAdmin):
 
     def month_year(self, obj):
         return f"{obj.month} {obj.year}"
-
     month_year.short_description = 'Period'
 
     def attendance_summary(self, obj):
-        return f"M: {obj.attendance_men} | W: {obj.attendance_women} | Y: {obj.attendance_youth}"
-
+        return f"M: {obj.attendance_Men} | W: {obj.attendance_Women} | Y: {obj.attendance_Youth}"
     attendance_summary.short_description = 'Attendance'
 
     def financial_summary(self, obj):
         return f"Total: {obj.total_givings}"
-
     financial_summary.short_description = 'Finances'
 
     def generate_reports(self, request, queryset):
         for report in queryset:
-            # Regenerate report data
             generate_monthly_report(
                 report.church_name,
                 datetime.strptime(report.month, "%B").month,
                 report.year
             )
         self.message_user(request, "Selected reports have been regenerated.")
-
     generate_reports.short_description = "Regenerate selected reports"
 
     def approve_reports(self, request, queryset):
         updated = queryset.update(is_approved=True, approved_by=request.user.get_full_name())
         self.message_user(request, f"{updated} reports have been approved.")
-
     approve_reports.short_description = "Approve selected reports"
+
 
 class USSD_TransactionsAdmin(admin.ModelAdmin):
     list_display = ['date', 'week_of_month', 'Txn_code', 'Phone_number', 'Txn_type', 'Amount', 'Month', 'Timestamp' ]
@@ -141,7 +136,7 @@ class Mission_OfferingAdmin(admin.ModelAdmin):
 admin.site.register(Mission_Offering, Mission_OfferingAdmin)
 
 class MissionsAdmin(admin.ModelAdmin):
-    list_display = ['date', "KAGDOM_Contribution", "District_Mission_Contribution", "Monthly_Support", "Missionary_Name", "Total_amount"]
+    list_display = ['date', "KAGDOM_Contribution", "District_Mission_Contribution", "Monthly_Support", "Missionary_Name", "Total_amount", "church_name"]
     search_fields = ['KAGDOM_Contribution', "District_Mission_Contribution", "Monthly_Support", "Missionary_Name"]
 
 admin.site.register(Missions, MissionsAdmin)

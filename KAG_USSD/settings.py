@@ -36,6 +36,7 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
+    #'Users'
     'Local_Church',
     'Section',
     'District',
@@ -169,4 +170,6 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 #DATABASE_ROUTERS = ['Local_Church.routers.DatabaseRouter']
+
+#AUTH_USER_MODEL = 'Users.CustomUser'
 

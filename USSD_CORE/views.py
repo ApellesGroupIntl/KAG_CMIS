@@ -1,4 +1,5 @@
-from .utils import save_transaction
+from .utils import save_section_transaction
+from .utils import save_local_transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from datetime import datetime
@@ -30,6 +31,16 @@ def get_transaction_type(menu_level, sub_choice):
             "1": "Sunday Service Offering",
             "2": "Mid-Week Offering"
         }.get(sub_choice, "General Offering")
+
+    elif menu_level == "5":
+        return {
+            "1": "Men",
+            "2": "WWK",
+            "3": "Youths",
+            "4": "Teens",
+            "5": "Children"
+        }.get(sub_choice, "Update Attendance")
+
     elif menu_level == "6":
         return {
             "1": "Men Big Day",
@@ -124,7 +135,7 @@ def ussd_callback(request):
             "1. Give an Offering\n"
             "2. Pay your Tithe\n"
             "3. Mission Offering\n"
-            "4. Support Plot Buying\n"
+            "4. Support Church Expenses\n"
             "5. Big Day Giving\n"
             "0. Exit", content_type="text/plain"
         )
@@ -151,7 +162,7 @@ def ussd_callback(request):
                 txn_type = get_transaction_type("1", user_responses[1])
                 code = generate_transaction_code()
                 try:
-                    save_transaction(phone_number, txn_type, amount, current_month, code, timestamp)
+                    save_local_transaction(phone_number, txn_type, amount, current_month, code, timestamp)
                     return HttpResponse(f"END Thank you! You gave Ksh {amount} for {txn_type}. Code: {code}. God bless you!", content_type="text/plain")
                 except:
                     return HttpResponse("END Failed to save transaction. Try again.", content_type="text/plain")
@@ -174,7 +185,7 @@ def ussd_callback(request):
             if user_responses[2] == "1":
                 amount = user_responses[1]
                 code = generate_transaction_code()
-                save_transaction(phone_number, "Tithe", amount, current_month, code, timestamp)
+                save_local_transaction(phone_number, "Tithe", amount, current_month, code, timestamp)
                 return HttpResponse(f"END Tithe of Ksh {amount} received. Code: {code}", content_type="text/plain")
             else:
                 return HttpResponse("END Transaction cancelled.", content_type="text/plain")
@@ -195,7 +206,7 @@ def ussd_callback(request):
             if user_responses[2] == "1":
                 amount = user_responses[1]
                 code = generate_transaction_code()
-                save_transaction(phone_number, "Mission Offering", amount, current_month, code, timestamp)
+                save_local_transaction(phone_number, "Mission Offering", amount, current_month, code, timestamp)
                 return HttpResponse(f"END Mission Offering of Ksh {amount} received. Code: {code}", content_type="text/plain")
             else:
                 return HttpResponse("END Transaction cancelled.", content_type="text/plain")
@@ -209,14 +220,14 @@ def ussd_callback(request):
             if not validate_amount(amount):
                 return HttpResponse("CON Invalid amount. Enter a number like 500\n00. Back", content_type="text/plain")
             return HttpResponse(
-                f"CON Confirm Plot Buying Support\nAmount: Ksh {amount} for {current_month}\n1. Confirm\n2. Cancel\n00. Back",
+                f"CON Confirm Church Expenses Support\nAmount: Ksh {amount} for {current_month}\n1. Confirm\n2. Cancel\n00. Back",
                 content_type="text/plain"
             )
         elif len(user_responses) == 3:
             if user_responses[2] == "1":
                 amount = user_responses[1]
                 code = generate_transaction_code()
-                save_transaction(phone_number, "Plot Buying Support", amount, current_month, code, timestamp)
+                save_local_transaction(phone_number, "Church Expenses Support", amount, current_month, code, timestamp)
                 return HttpResponse(f"END Thank you! Plot support of Ksh {amount} received. Code: {code}", content_type="text/plain")
             else:
                 return HttpResponse("END Transaction cancelled.", content_type="text/plain")
@@ -245,7 +256,7 @@ def ussd_callback(request):
                 txn_type = get_transaction_type("6", user_responses[1])
                 amount = user_responses[2]
                 code = generate_transaction_code()
-                save_transaction(phone_number, txn_type, amount, current_month, code, timestamp)
+                save_local_transaction(phone_number, txn_type, amount, current_month, code, timestamp)
                 return HttpResponse(f"END Thank you! Your {txn_type} of Ksh {amount} was received. Code: {code}", content_type="text/plain")
             else:
                 return HttpResponse("END Transaction cancelled.", content_type="text/plain")
@@ -286,8 +297,8 @@ def ussd_callback_section(request):
             "1. Update Offerings\n"
             "2. Update Tithe\n"
             "3. Update Mission Offering\n"
-            "4. Update Attendance\n"
-            "5. Big Day Giving\n"
+            "4. Update Expenses\n"
+            "5. Update Attendance\n"
             "0. Exit", content_type="text/plain"
         )
 
@@ -313,7 +324,7 @@ def ussd_callback_section(request):
                 txn_type = get_transaction_type("1", user_responses[1])
                 code = generate_section_transaction_code()
                 try:
-                    save_transaction(phone_number, txn_type, amount, current_month, code, timestamp)
+                    save_section_transaction(phone_number, txn_type, amount, current_month, code, timestamp)
                     return HttpResponse(f"END Thank you! You gave Ksh {amount} for {txn_type}. Code: {code}. God bless you!", content_type="text/plain")
                 except:
                     return HttpResponse("END Failed to save transaction. Try again.", content_type="text/plain")
@@ -336,7 +347,7 @@ def ussd_callback_section(request):
             if user_responses[2] == "1":
                 amount = user_responses[1]
                 code = generate_section_transaction_code()
-                save_transaction(phone_number, "Tithe", amount, current_month, code, timestamp)
+                save_section_transaction(phone_number, "Tithe", amount, current_month, code, timestamp)
                 return HttpResponse(f"END Tithe of Ksh {amount} received. Code: {code}", content_type="text/plain")
             else:
                 return HttpResponse("END Transaction cancelled.", content_type="text/plain")
@@ -357,7 +368,7 @@ def ussd_callback_section(request):
             if user_responses[2] == "1":
                 amount = user_responses[1]
                 code = generate_section_transaction_code()
-                save_transaction(phone_number, "Mission Offering", amount, current_month, code, timestamp)
+                save_section_transaction(phone_number, "Mission Offering", amount, current_month, code, timestamp)
                 return HttpResponse(f"END Mission Offering of Ksh {amount} received. Code: {code}", content_type="text/plain")
             else:
                 return HttpResponse("END Transaction cancelled.", content_type="text/plain")
@@ -365,21 +376,21 @@ def ussd_callback_section(request):
     # ATTENDANCE FLOW
     elif text.startswith("4"):
         if len(user_responses) == 1:
-            return HttpResponse("CON Enter Amount for Plot Buying Support (e.g., 500)\n00. Back", content_type="text/plain")
+            return HttpResponse("CON Enter Amount for Church Expenses (e.g., 500)\n00. Back", content_type="text/plain")
         elif len(user_responses) == 2:
             amount = user_responses[1]
             if not validate_amount(amount):
                 return HttpResponse("CON Invalid amount. Enter a number like 500\n00. Back", content_type="text/plain")
             return HttpResponse(
-                f"CON Confirm Plot Buying Support\nAmount: Ksh {amount} for {current_month}\n1. Confirm\n2. Cancel\n00. Back",
+                f"CON Confirm Church Expenses \nAmount: Ksh {amount} for {current_month}\n1. Confirm\n2. Cancel\n00. Back",
                 content_type="text/plain"
             )
         elif len(user_responses) == 3:
             if user_responses[2] == "1":
                 amount = user_responses[1]
                 code = generate_section_transaction_code()
-                save_transaction(phone_number, "Plot Buying Support", amount, current_month, code, timestamp)
-                return HttpResponse(f"END Thank you! Plot support of Ksh {amount} received. Code: {code}", content_type="text/plain")
+                save_section_transaction(phone_number, "Church Expenses", amount, current_month, code, timestamp)
+                return HttpResponse(f"END Thank you! for Updating Expenses of Ksh {amount} received. Code: {code}", content_type="text/plain")
             else:
                 return HttpResponse("END Transaction cancelled.", content_type="text/plain")
 
@@ -391,7 +402,7 @@ def ussd_callback_section(request):
                 content_type="text/plain"
             )
         elif len(user_responses) == 2:
-            return HttpResponse("CON Enter Count  (e.g., 25 )\n00. Back", content_type="text/plain")
+            return HttpResponse("CON Enter Count  (e.g.,25 )\n00. Back", content_type="text/plain")
         elif len(user_responses) == 3:
             amount = user_responses[2]
             if not validate_amount(amount):
@@ -407,8 +418,8 @@ def ussd_callback_section(request):
                 txn_type = get_transaction_type("6", user_responses[1])
                 amount = user_responses[2]
                 code = generate_section_transaction_code()
-                save_transaction(phone_number, txn_type, amount, current_month, code, timestamp)
-                return HttpResponse(f"END Thank you! Your {txn_type} of Count {amount} was received.", content_type="text/plain")
+                save_section_transaction(phone_number, txn_type, amount, current_month, code, timestamp)
+                return HttpResponse(f"END Thank you! Your update on {txn_type} attendance of Count {amount} was received.", content_type="text/plain")
             else:
                 return HttpResponse("END Transaction cancelled.", content_type="text/plain")
 
