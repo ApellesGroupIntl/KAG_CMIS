@@ -1,0 +1,540 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}KAG MURANG'A CHURCH - Visitors{% endblock %}
+
+{% block page_title %}Visitors{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'Local_Church:dashboard' %}">Local Church</a></li>
+<li class="breadcrumb-item active">Visitors</li>
+{% endblock %}
+
+{% block content %}
+<!-- Messages Display -->
+{% if messages %}
+<div class="row mb-3">
+    <div class="col-12">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card bg-primary-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Total Visitors</h6>
+                <h3 class="card-text text-white mb-0">{{ total_visitors|default:0|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card bg-success-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">This Month</h6>
+                <h3 class="card-text text-white mb-0">{{ this_month_visitors|default:0|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card bg-info-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Returning</h6>
+                <h3 class="card-text text-white mb-0">{{ returning_visitors|default:0|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card bg-warning-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Last Month</h6>
+                <h3 class="card-text text-white mb-0">{{ last_month_visitors|default:0|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-5">
+        <!-- Add New Form -->
+        <div class="card card-action mb-4">
+            <div class="card-header d-flex align-items-center">
+                <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i> Add New Visitor</h5>
+                <button class="btn btn-sm btn-outline-secondary ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#addFormCollapse" aria-expanded="true">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+            <div class="collapse show" id="addFormCollapse">
+                <div class="card-body">
+                    <form method="post" action="{% url 'Local_Church:visitor_create' %}">
+                        {% csrf_token %}
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Date <span class="text-danger">*</span></label>
+                                <input type="date" name="date" class="form-control" value="{{ today }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Name <span class="text-danger">*</span></label>
+                                <input type="text" name="Name" class="form-control" placeholder="Visitor Name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Phone</label>
+                                <input type="text" name="Phone_number" class="form-control" placeholder="Phone Number">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Area</label>
+                                <input type="text" name="Area_of_residence" class="form-control" placeholder="Area of Residence">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Reason for Visit</label>
+                                <input type="text" name="Reason_for_visit" class="form-control" placeholder="Reason for visit">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Church <span class="text-danger">*</span></label>
+                                <select name="church_name" class="form-select" required>
+                                    <option value="Murangá Church" selected>Murangá Church</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" name="Main_Service" id="Main_Service">
+                                    <label class="form-check-label" for="Main_Service">Main Service</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="Mid_Week_Service" id="Mid_Week_Service">
+                                    <label class="form-check-label" for="Mid_Week_Service">Mid Week Service</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mt-3">
+                                    <input class="form-check-input" type="checkbox" name="Fellowship_again" id="Fellowship_again" checked>
+                                    <label class="form-check-label" for="Fellowship_again">Will Fellowship Again</label>
+                                </div>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-check-circle me-1"></i> Add Visitor
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="card card-action mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i> Visitor Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>This Month</span>
+                        <span>{{ this_month_visitors|default:0 }} visitors</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: {% widthratio this_month_visitors|default:0 total_visitors|default:1 100 %}%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Returning Visitors</span>
+                        <span>{{ returning_visitors|default:0 }} visitors</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" role="progressbar"
+                             style="width: {% widthratio returning_visitors|default:0 total_visitors|default:1 100 %}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Last Month</span>
+                        <span>{{ last_month_visitors|default:0 }} visitors</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-warning" role="progressbar"
+                             style="width: {% widthratio last_month_visitors|default:0 total_visitors|default:1 100 %}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <!-- Filters -->
+        <div class="card card-action mb-4">
+            <div class="card-body py-2">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <label class="form-label">Month</label>
+                        <select class="form-select" id="monthFilter">
+                            <option value="">All Months</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Service Type</label>
+                        <select class="form-select" id="serviceFilter">
+                            <option value="">All Services</option>
+                            <option value="main">Main Service</option>
+                            <option value="midweek">Mid Week Service</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="showFilterNotification()">
+                            <i class="bi bi-filter me-1"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Visitors List -->
+        <div class="card card-action">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i> Visitors</h5>
+                <span class="badge bg-primary rounded-pill">{{ total_visitors|default:0 }} visitors</span>
+            </div>
+
+            <div class="card-body p-0">
+                {% if visitors %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-borderless mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Area</th>
+                                <th>Services</th>
+                                <th>Returning</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for visitor in visitors %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-medium">{{ visitor.date|date:"M d, Y" }}</span>
+                                        <small class="text-muted">{{ visitor.date|date:"l" }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-medium">{{ visitor.Name }}</span>
+                                        {% if visitor.Reason_for_visit %}
+                                        <small class="text-muted">{{ visitor.Reason_for_visit|truncatewords:3 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>{{ visitor.Phone_number|default:"-" }}</td>
+                                <td>{{ visitor.Area_of_residence|default:"-" }}</td>
+                                <td>
+                                    {% if visitor.Main_Service %}<span class="badge bg-primary me-1">Main</span>{% endif %}
+                                    {% if visitor.Mid_Week_Service %}<span class="badge bg-info">Midweek</span>{% endif %}
+                                </td>
+                                <td>
+                                    {% if visitor.Fellowship_again %}
+                                    <span class="badge bg-success">Yes</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">No</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ visitor.id }}" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ visitor.id }}" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if visitors.has_other_pages %}
+                <div class="card-footer">
+                    <nav aria-label="Visitors pagination">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            {% if visitors.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ visitors.previous_page_number }}">Previous</a>
+                            </li>
+                            {% endif %}
+
+                            {% for i in visitors.paginator.page_range %}
+                                {% if visitors.number == i %}
+                                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                                {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if visitors.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ visitors.next_page_number }}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox display-4 opacity-25"></i>
+                    <h4 class="mt-3">No Visitors</h4>
+                    <p>Get started by adding your first visitor.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals Section -->
+{% for visitor in visitors %}
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal{{ visitor.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Edit Visitor</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'Local_Church:visitor_edit' visitor.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="date" class="form-control" value="{{ visitor.date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="Name" class="form-control" value="{{ visitor.Name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            <input type="text" name="Phone_number" class="form-control" value="{{ visitor.Phone_number|default:'' }}" placeholder="Phone Number">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Area</label>
+                            <input type="text" name="Area_of_residence" class="form-control" value="{{ visitor.Area_of_residence|default:'' }}" placeholder="Area of Residence">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Reason for Visit</label>
+                            <input type="text" name="Reason_for_visit" class="form-control" value="{{ visitor.Reason_for_visit|default:'' }}" placeholder="Reason for visit">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Church</label>
+                            <select name="church_name" class="form-select" required>
+                                <option value="Murangá Church" {% if visitor.church_name == "Murangá Church" %}selected{% endif %}>Murangá Church</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="Main_Service" id="Main_Service_edit{{ visitor.id }}" {% if visitor.Main_Service %}checked{% endif %}>
+                                <label class="form-check-label" for="Main_Service_edit{{ visitor.id }}">Main Service</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="Mid_Week_Service" id="Mid_Week_Service_edit{{ visitor.id }}" {% if visitor.Mid_Week_Service %}checked{% endif %}>
+                                <label class="form-check-label" for="Mid_Week_Service_edit{{ visitor.id }}">Mid Week Service</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="Fellowship_again" id="Fellowship_again_edit{{ visitor.id }}" {% if visitor.Fellowship_again %}checked{% endif %}>
+                                <label class="form-check-label" for="Fellowship_again_edit{{ visitor.id }}">Will Fellowship Again</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Visitor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal{{ visitor.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the visitor <strong>{{ visitor.Name }}</strong> from {{ visitor.date|date:"M d, Y" }}?</p>
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    <strong>This action cannot be undone.</strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'Local_Church:visitor_delete' visitor.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Visitor</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card.bg-primary-hover { background: linear-gradient(135deg, #3498db, #2980b9); }
+    .stat-card.bg-success-hover { background: linear-gradient(135deg, #27ae60, #219653); }
+    .stat-card.bg-info-hover { background: linear-gradient(135deg, #17a2b8, #138496); }
+    .stat-card.bg-warning-hover { background: linear-gradient(135deg, #f39c12, #e67e22); }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .card-action {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.06);
+    }
+
+    .table-borderless th {
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: #6c757d;
+        border-top: none;
+        padding: 1rem 0.5rem;
+    }
+
+    .table-borderless td {
+        border-top: 1px solid #f1f3f4;
+        vertical-align: middle;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .table-borderless tr:first-child td {
+        border-top: none;
+    }
+
+    .table-borderless tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    [data-bs-theme="dark"] .table-borderless tr:hover {
+        background-color: #2a2e32;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Show filter notification
+function showFilterNotification() {
+    const monthFilter = document.getElementById('monthFilter');
+    const serviceFilter = document.getElementById('serviceFilter');
+
+    const monthText = monthFilter.options[monthFilter.selectedIndex].text;
+    const serviceText = serviceFilter.options[serviceFilter.selectedIndex].text;
+
+    alert('Filter functionality would be implemented here. Month: ' + monthText + ', Service: ' + serviceText);
+    // In a real implementation, this would make an AJAX request or redirect to a filtered URL
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date as default for the add form
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.querySelector('input[name="date"]');
+    if (dateInput && !dateInput.value) {
+        dateInput.value = today;
+    }
+
+    // Initialize all modals properly
+    var modals = document.querySelectorAll('.modal');
+    modals.forEach(function(modal) {
+        modal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var modal = this;
+        });
+    });
+
+    // Check if we have a success message in URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+        // Show success message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            <i class="bi bi-check-circle-fill me-2"></i>
+            Visitor added successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.querySelector('.row').prepend(alertDiv);
+
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Check for error messages
+    if (urlParams.get('error')) {
+        // Show error message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            There was a problem adding the visitor. Please try again.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.querySelector('.row').prepend(alertDiv);
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,106 @@
+<!-- reports/list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Reports</h1>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="mb-0">Filter Reports</h5>
+                </div>
+                <div class="col-md-6 text-right">
+                    <a href="{% url 'generate_report' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Generate New Report
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <form method="get">
+                <div class="row">
+                    {% for field in form %}
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            {{ field.label_tag }}
+                            {{ field }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="col-md-4 align-self-end">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="{% url 'report_list' %}" class="btn btn-secondary">Reset</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Report List</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Church</th>
+                            <th>Period</th>
+                            <th>Attendance</th>
+                            <th>Finances</th>
+                            <th>Status</th>
+                            <th>Generated On</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in reports %}
+                        <tr>
+                            <td>{{ report.church_name }}</td>
+                            <td>{{ report.month }} {{ report.year }}</td>
+                            <td>
+                                <small>
+                                    Men: {{ report.attendance_men }}<br>
+                                    Women: {{ report.attendance_women }}<br>
+                                    Youth: {{ report.attendance_youth }}
+                                </small>
+                            </td>
+                            <td>
+                                <small>
+                                    Tithes: {{ report.tithes }}<br>
+                                    Offerings: {{ report.offerings }}<br>
+                                    Total: {{ report.total_givings }}
+                                </small>
+                            </td>
+                            <td>
+                                {% if report.is_approved %}
+                                <span class="badge badge-success">Approved</span>
+                                {% else %}
+                                <span class="badge badge-warning">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ report.generated_on|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'report_detail' report.pk %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No reports found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

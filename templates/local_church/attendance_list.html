@@ -1,0 +1,524 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}KAG MURANG'A CHURCH - Attendance Records{% endblock %}
+
+{% block page_title %}Attendance Records{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'Local_Church:dashboard' %}">Local Church</a></li>
+<li class="breadcrumb-item active">Attendance</li>
+{% endblock %}
+
+{% block content %}
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-primary-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Total Records</h6>
+                <h3 class="card-text text-white mb-0">{{ attendance_records.paginator.count|default:0|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-success-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Total Attendance</h6>
+                <h3 class="card-text text-white mb-0">{{ total_attendance|default:0|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-info-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Average</h6>
+                <h3 class="card-text text-white mb-0">
+                    {% with count=attendance_records.paginator.count|default:0 total=total_attendance|default:0 %}
+                        {% if count > 0 %}
+                            {{ total|floatformat:0 }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    {% endwith %}
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-warning-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Men</h6>
+                <h3 class="card-text text-white mb-0">{{ men_total|default:0|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-purple-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Women</h6>
+                <h3 class="card-text text-white mb-0">{{ women_total|default:0|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-teal-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Children</h6>
+                <h3 class="card-text text-white mb-0">{{ children_total|default:0|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-5">
+        <!-- Add New Form -->
+        <div class="card card-action mb-4">
+            <div class="card-header d-flex align-items-center">
+                <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i> Add New Attendance</h5>
+                <button class="btn btn-sm btn-outline-secondary ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#addFormCollapse" aria-expanded="true">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+            <div class="collapse show" id="addFormCollapse">
+                <div class="card-body">
+                    <form method="post" action="{% url 'Local_Church:attendance_create' %}" id="attendanceForm">
+                        {% csrf_token %}
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Date</label>
+                                <input type="date" name="date" class="form-control" value="{{ today }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Church</label>
+                                <select name="church_name" class="form-select" required>
+                                    <option value="Murangá Church">Murangá Church</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 col-6">
+                                <label class="form-label">Men</label>
+                                <input type="number" name="Men" class="form-control" placeholder="0" min="0">
+                            </div>
+                            <div class="col-md-4 col-6">
+                                <label class="form-label">Women</label>
+                                <input type="number" name="Ladies" class="form-control" placeholder="0" min="0">
+                            </div>
+                            <div class="col-md-4 col-6">
+                                <label class="form-label">Youths</label>
+                                <input type="number" name="Youths" class="form-control" placeholder="0" min="0">
+                            </div>
+                            <div class="col-md-4 col-6">
+                                <label class="form-label">Teens</label>
+                                <input type="number" name="Teens" class="form-control" placeholder="0" min="0">
+                            </div>
+                            <div class="col-md-4 col-6">
+                                <label class="form-label">Children</label>
+                                <input type="number" name="Children" class="form-control" placeholder="0" min="0">
+                            </div>
+                            <div class="col-md-4 col-6">
+                                <label class="form-label">Total</label>
+                                <input type="text" class="form-control" id="totalField" placeholder="0" readonly>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-check-circle me-1"></i> Add Attendance Record
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="card card-action mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i> Attendance Overview</h5>
+            </div>
+            <div class="card-body">
+                {% with total=total_attendance|default:1 %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Men</span>
+                        <span>{% widthratio men_total|default:0 total 100 %}%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: {% widthratio men_total|default:0 total 100 %}%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Women</span>
+                        <span>{% widthratio women_total|default:0 total 100 %}%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-purple" role="progressbar" style="width: {% widthratio women_total|default:0 total 100 %}%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Youths & Teens</span>
+                        <span>{% widthratio youth_total|default:0 total 100 %}%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: {% widthratio youth_total|default:0 total 100 %}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Children</span>
+                        <span>{% widthratio children_total|default:0 total 100 %}%</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-teal" role="progressbar" style="width: {% widthratio children_total|default:0 total 100 %}%"></div>
+                    </div>
+                </div>
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <!-- Filters -->
+        <div class="card card-action mb-4">
+            <div class="card-body py-2">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-4">
+                        <label class="form-label">Month</label>
+                        <select class="form-select" id="monthFilter">
+                            <option value="">All Months</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Year</label>
+                        <select class="form-select" id="yearFilter">
+                            <option value="">All Years</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button class="btn btn-primary w-100 mb-1" onclick="filterTable()">
+                            <i class="bi bi-filter me-1"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance List -->
+        <div class="card card-action">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-people me-2"></i> Attendance Records</h5>
+                <span class="badge bg-primary rounded-pill">{{ attendance_records.paginator.count|default:0 }} records</span>
+            </div>
+
+            <div class="card-body p-0">
+                {% if attendance_records %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-borderless mb-0" id="attendanceTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th class="text-center">Men</th>
+                                <th class="text-center">Women</th>
+                                <th class="text-center">Youths</th>
+                                <th class="text-center">Teens</th>
+                                <th class="text-center">Children</th>
+                                <th class="text-center">Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in attendance_records %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-medium">{{ record.date|date:"M d, Y" }}</span>
+                                        <small class="text-muted">{{ record.date|date:"l" }}</small>
+                                    </div>
+                                </td>
+                                <td class="text-center">{{ record.Men|default:0 }}</td>
+                                <td class="text-center">{{ record.Ladies|default:0 }}</td>
+                                <td class="text-center">{{ record.Youths|default:0 }}</td>
+                                <td class="text-center">{{ record.Teens|default:0 }}</td>
+                                <td class="text-center">{{ record.Children|default:0 }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary rounded-pill">
+                                        {{ record.Men|add:record.Ladies|add:record.Youths|add:record.Teens|add:record.Children }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ record.id }}" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ record.id }}" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if attendance_records.has_other_pages %}
+                <div class="card-footer">
+                    <nav aria-label="Attendance records pagination">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            {% if attendance_records.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ attendance_records.previous_page_number }}">Previous</a>
+                            </li>
+                            {% endif %}
+
+                            {% for i in attendance_records.paginator.page_range %}
+                                {% if attendance_records.number == i %}
+                                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                                {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if attendance_records.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ attendance_records.next_page_number }}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox display-4 opacity-25"></i>
+                    <h4 class="mt-3">No Attendance Records</h4>
+                    <p>Get started by adding your first attendance record.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals Section -->
+{% for record in attendance_records %}
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal{{ record.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Edit Attendance Record</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'Local_Church:attendance_edit' record.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="date" class="form-control" value="{{ record.date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Church</label>
+                            <select name="church_name" class="form-select" required>
+                                <option value="Murangá Church" {% if record.church_name == "Murangá Church" %}selected{% endif %}>Murangá Church</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Men</label>
+                            <input type="number" name="Men" class="form-control" value="{{ record.Men|default:0 }}" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Women</label>
+                            <input type="number" name="Ladies" class="form-control" value="{{ record.Ladies|default:0 }}" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Youths</label>
+                            <input type="number" name="Youths" class="form-control" value="{{ record.Youths|default:0 }}" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Teens</label>
+                            <input type="number" name="Teens" class="form-control" value="{{ record.Teens|default:0 }}" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Children</label>
+                            <input type="number" name="Children" class="form-control" value="{{ record.Children|default:0 }}" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Total</label>
+                            <input type="text" class="form-control" value="{{ record.Men|add:record.Ladies|add:record.Youths|add:record.Teens|add:record.Children }}" readonly>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Record</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal{{ record.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the attendance record for <strong>{{ record.date|date:"M d, Y" }}</strong>?</p>
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    <strong>This action cannot be undone.</strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'Local_Church:attendance_delete' record.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Record</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card.bg-primary-hover { background: linear-gradient(135deg, #3498db, #2980b9); }
+    .stat-card.bg-success-hover { background: linear-gradient(135deg, #27ae60, #219653); }
+    .stat-card.bg-info-hover { background: linear-gradient(135deg, #17a2b8, #138496); }
+    .stat-card.bg-warning-hover { background: linear-gradient(135deg, #f39c12, #e67e22); }
+    .stat-card.bg-purple-hover { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+    .stat-card.bg-teal-hover { background: linear-gradient(135deg, #1abc9c, #16a085); }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .card-action {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.06);
+    }
+
+    .table-borderless th {
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: #6c757d;
+        border-top: none;
+        padding: 1rem 0.5rem;
+    }
+
+    .table-borderless td {
+        border-top: 1px solid #f1f3f4;
+        vertical-align: middle;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .table-borderless tr:first-child td {
+        border-top: none;
+    }
+
+    .table-borderless tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    [data-bs-theme="dark"] .table-borderless tr:hover {
+        background-color: #2a2e32;
+    }
+
+    .bg-purple { background-color: #9b59b6 !important; }
+    .bg-teal { background-color: #1abc9c !important; }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date as default for the add form
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.querySelector('input[name="date"]');
+    if (dateInput && !dateInput.value) {
+        dateInput.value = today;
+    }
+
+    // Calculate total attendance in real-time
+    const form = document.getElementById('attendanceForm');
+    if (form) {
+        const numberInputs = form.querySelectorAll('input[type="number"]');
+        const totalField = document.getElementById('totalField');
+
+        function calculateTotal() {
+            let total = 0;
+            numberInputs.forEach(input => {
+                total += parseInt(input.value || 0);
+            });
+            totalField.value = total;
+        }
+
+        numberInputs.forEach(input => {
+            input.addEventListener('input', calculateTotal);
+        });
+
+        // Calculate initial total
+        calculateTotal();
+    }
+
+    // Initialize all modals properly
+    var modals = document.querySelectorAll('.modal');
+    modals.forEach(function(modal) {
+        modal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var modal = this;
+        });
+    });
+});
+
+// Simple client-side filtering (for demonstration)
+function filterTable() {
+    const monthFilter = document.getElementById('monthFilter').value;
+    const yearFilter = document.getElementById('yearFilter').value;
+
+    alert('Filter functionality would be implemented here. Month: ' + monthFilter + ', Year: ' + yearFilter);
+    // In a real implementation, this would make an AJAX request or redirect to a filtered URL
+}
+</script>
+{% endblock %}

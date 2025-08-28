@@ -1,0 +1,639 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}KAG MURANG'A CHURCH - Expenses{% endblock %}
+
+{% block page_title %}Expenses{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'Local_Church:dashboard' %}">Local Church</a></li>
+<li class="breadcrumb-item active">Expenses</li>
+{% endblock %}
+
+{% block content %}
+<!-- Messages Display -->
+{% if messages %}
+<div class="row mb-3">
+    <div class="col-12">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-primary-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Total Expenses</h6>
+                <h3 class="card-text text-white mb-0">{{ expenses.paginator.count|default:0|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-success-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Total Amount</h6>
+                <h3 class="card-text text-white mb-0">Ksh {{ total_amount|default:0|floatformat:2|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-info-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Approved</h6>
+                <h3 class="card-text text-white mb-0">Ksh {{ approved_amount|default:0|floatformat:2|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-warning-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Pending</h6>
+                <h3 class="card-text text-white mb-0">Ksh {{ pending_amount|default:0|floatformat:2|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-purple-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">This Month</h6>
+                <h3 class="card-text text-white mb-0">Ksh {{ this_month_total|default:0|floatformat:2|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card stat-card bg-teal-hover mb-2">
+            <div class="card-body p-3 text-center">
+                <h6 class="card-title text-white-50 mb-1">Avg. Expense</h6>
+                <h3 class="card-text text-white mb-0">
+                    {% if expenses.paginator.count > 0 %}
+                        Ksh {{ total_amount|divisibleby:expenses.paginator.count|floatformat:2|intcomma }}
+                    {% else %}
+                        Ksh 0.00
+                    {% endif %}
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-5">
+        <!-- Add New Form -->
+        <div class="card card-action mb-4">
+            <div class="card-header d-flex align-items-center">
+                <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i> Add New Expense</h5>
+                <button class="btn btn-sm btn-outline-secondary ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#addFormCollapse" aria-expanded="true">
+                    <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+            <div class="collapse show" id="addFormCollapse">
+                <div class="card-body">
+                    <form method="post" action="{% url 'Local_Church:expense_create' %}">
+                        {% csrf_token %}
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Date <span class="text-danger">*</span></label>
+                                <input type="date" name="date" class="form-control" value="{{ today }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Amount <span class="text-danger">*</span></label>
+                                <input type="number" name="Expense_Amount" class="form-control" step="0.01" placeholder="0.00" min="0" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label">Expense Description <span class="text-danger">*</span></label>
+                                <textarea name="Expense_Name" class="form-control" placeholder="Enter detailed expense description..." rows="3" required></textarea>
+                                <small class="text-muted">Describe what the expense was for (e.g., "Purchase of sound equipment for main hall")</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Church <span class="text-danger">*</span></label>
+                                <select name="church_name" class="form-select" required>
+                                    <option value="">Select Church</option>
+                                    <option value="Murangá Church" selected>Murangá Church</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Category</label>
+                                <select name="category" class="form-select">
+                                    <option value="">Select Category</option>
+                                    <option value="Utilities">Utilities (Water, Electricity)</option>
+                                    <option value="Maintenance">Maintenance & Repairs</option>
+                                    <option value="Supplies">Office Supplies</option>
+                                    <option value="Outreach">Outreach Programs</option>
+                                    <option value="Staff">Staff Expenses</option>
+                                    <option value="Events">Church Events</option>
+                                    <option value="Equipment">Equipment Purchase</option>
+                                    <option value="Other">Other Expenses</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="Expense_Approved" id="expenseApproved" checked>
+                                    <label class="form-check-label" for="expenseApproved">Mark as Approved</label>
+                                </div>
+                                <small class="text-muted">Uncheck if this expense requires approval</small>
+                            </div>
+                            <div class="col-12 mt-3">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-check-circle me-1"></i> Add Expense
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expense Summary -->
+        <div class="card card-action mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i> Expense Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Approved Expenses</span>
+                        <span>{{ approved_count }} items</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-success" role="progressbar"
+                             style="width: {% if expenses.count > 0 %}{% widthratio approved_count expenses.count 100 %}{% else %}0{% endif %}%"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Pending Approval</span>
+                        <span>{{ pending_count }} items</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-warning" role="progressbar"
+                             style="width: {% if expenses.count > 0 %}{% widthratio pending_count expenses.count 100 %}{% else %}0{% endif %}%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Approval Rate</span>
+                        <span>
+                            {% if expenses.count > 0 %}
+                                {% widthratio approved_count expenses.count 100 %}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-info" role="progressbar"
+                             style="width: {% if expenses.count > 0 %}{% widthratio approved_count expenses.count 100 %}{% else %}0{% endif %}%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <!-- Filters -->
+        <div class="card card-action mb-4">
+            <div class="card-body py-2">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="approved">Approved</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Month</label>
+                        <select class="form-select" id="monthFilter">
+                            <option value="">All Months</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Year</label>
+                        <select class="form-select" id="yearFilter">
+                            <option value="">All Years</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="showFilterNotification()">
+                            <i class="bi bi-filter me-1"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expenses List -->
+        <div class="card card-action">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-currency-exchange me-2"></i> Expenses</h5>
+                <div>
+                    <span class="badge bg-success me-2">Ksh {{ total_amount|default:0|floatformat:2|intcomma }} Total</span>
+                    <span class="badge bg-info">Ksh {{ approved_amount|default:0|floatformat:2|intcomma }} Approved</span>
+                </div>
+            </div>
+
+            <div class="card-body p-0">
+                {% if expenses %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-borderless mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th class="text-end">Amount</th>
+                                <th>Status</th>
+                                <th>Church</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in expenses %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-medium">{{ expense.date|date:"M d, Y" }}</span>
+                                        <small class="text-muted">{{ expense.date|date:"l" }}</small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="expense-description">
+                                        <div class="fw-medium">{{ expense.Expense_Name|truncatewords:8 }}</div>
+                                        {% if expense.Expense_Name|wordcount > 8 %}
+                                        <small class="text-muted">Click view to see full description</small>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="text-end fw-bold text-danger">Ksh {{ expense.Expense_Amount|default:0|floatformat:2|intcomma }}</td>
+                                <td>
+                                    {% if expense.Expense_Approved %}
+                                    <span class="badge bg-success">Approved</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ expense.church_name }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewModal{{ expense.id }}" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ expense.id }}" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ expense.id }}" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                {% if expenses.has_other_pages %}
+                <div class="card-footer">
+                    <nav aria-label="Expenses pagination">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            {% if expenses.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ expenses.previous_page_number }}">Previous</a>
+                            </li>
+                            {% endif %}
+
+                            {% for i in expenses.paginator.page_range %}
+                                {% if expenses.number == i %}
+                                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                                {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if expenses.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ expenses.next_page_number }}">Next</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox display-4 opacity-25"></i>
+                    <h4 class="mt-3">No Expenses</h4>
+                    <p>Get started by adding your first expense.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals Section -->
+{% for expense in expenses %}
+<!-- View Modal -->
+<div class="modal fade" id="viewModal{{ expense.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Expense Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Date</label>
+                        <p>{{ expense.date|date:"M d, Y" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Amount</label>
+                        <p class="fw-bold text-danger">Ksh {{ expense.Expense_Amount|default:0|floatformat:2|intcomma }}</p>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-medium">Description</label>
+                        <div class="border rounded p-3 bg-light">
+                            {{ expense.Expense_Name }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Church</label>
+                        <p>{{ expense.church_name }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Status</label>
+                        <p>
+                            {% if expense.Expense_Approved %}
+                            <span class="badge bg-success">Approved</span>
+                            {% else %}
+                            <span class="badge bg-warning">Pending Approval</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% if expense.category %}
+                    <div class="col-12">
+                        <label class="form-label fw-medium">Category</label>
+                        <p>{{ expense.category }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal{{ expense.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Edit Expense</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'Local_Church:expense_edit' expense.pk %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Date</label>
+                            <input type="date" name="date" class="form-control" value="{{ expense.date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Amount</label>
+                            <input type="number" name="Expense_Amount" class="form-control" step="0.01" value="{{ expense.Expense_Amount }}" required min="0">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Expense Description</label>
+                            <textarea name="Expense_Name" class="form-control" rows="3" required>{{ expense.Expense_Name }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Church</label>
+                            <select name="church_name" class="form-select" required>
+                                <option value="Murangá Church" {% if expense.church_name == "Murangá Church" %}selected{% endif %}>Murangá Church</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Category</label>
+                            <select name="category" class="form-select">
+                                <option value="">Select Category</option>
+                                <option value="Utilities" {% if expense.category == "Utilities" %}selected{% endif %}>Utilities (Water, Electricity)</option>
+                                <option value="Maintenance" {% if expense.category == "Maintenance" %}selected{% endif %}>Maintenance & Repairs</option>
+                                <option value="Supplies" {% if expense.category == "Supplies" %}selected{% endif %}>Office Supplies</option>
+                                <option value="Outreach" {% if expense.category == "Outreach" %}selected{% endif %}>Outreach Programs</option>
+                                <option value="Staff" {% if expense.category == "Staff" %}selected{% endif %}>Staff Expenses</option>
+                                <option value="Events" {% if expense.category == "Events" %}selected{% endif %}>Church Events</option>
+                                <option value="Equipment" {% if expense.category == "Equipment" %}selected{% endif %}>Equipment Purchase</option>
+                                <option value="Other" {% if expense.category == "Other" %}selected{% endif %}>Other Expenses</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="Expense_Approved" id="editExpenseApproved{{ expense.id }}" {% if expense.Expense_Approved %}checked{% endif %}>
+                                <label class="form-check-label" for="editExpenseApproved{{ expense.id }}">Mark as Approved</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal{{ expense.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Confirm Delete</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the expense from {{ expense.date|date:"M d, Y" }}?</p>
+                <div class="alert alert-info">
+                    <strong>Description:</strong> {{ expense.Expense_Name|truncatewords:10 }}
+                </div>
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    <strong>This action cannot be undone.</strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" action="{% url 'Local_Church:expense_delete' expense.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Expense</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 12px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card.bg-primary-hover { background: linear-gradient(135deg, #3498db, #2980b9); }
+    .stat-card.bg-success-hover { background: linear-gradient(135deg, #27ae60, #219653); }
+    .stat-card.bg-info-hover { background: linear-gradient(135deg, #17a2b8, #138496); }
+    .stat-card.bg-warning-hover { background: linear-gradient(135deg, #f39c12, #e67e22); }
+    .stat-card.bg-purple-hover { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+    .stat-card.bg-teal-hover { background: linear-gradient(135deg, #1abc9c, #16a085); }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .card-action {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card-action:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.06);
+    }
+
+    .table-borderless th {
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        color: #6c757d;
+        border-top: none;
+        padding: 1rem 0.5rem;
+    }
+
+    .table-borderless td {
+        border-top: 1px solid #f1f3f4;
+        vertical-align: middle;
+        padding: 0.75rem 0.5rem;
+    }
+
+    .table-borderless tr:first-child td {
+        border-top: none;
+    }
+
+    .table-borderless tr:hover {
+        background-color: #f8f9fa;
+    }
+
+    [data-bs-theme="dark"] .table-borderless tr:hover {
+        background-color: #2a2e32;
+    }
+
+    .bg-purple { background-color: #9b59b6 !important; }
+    .bg-teal { background-color: #1abc9c !important; }
+
+    .expense-description {
+        max-width: 250px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Show filter notification
+function showFilterNotification() {
+    const statusFilter = document.getElementById('statusFilter');
+    const monthFilter = document.getElementById('monthFilter');
+    const yearFilter = document.getElementById('yearFilter');
+
+    const statusText = statusFilter.options[statusFilter.selectedIndex].text;
+    const monthText = monthFilter.options[monthFilter.selectedIndex].text;
+    const yearText = yearFilter.options[yearFilter.selectedIndex].text;
+
+    alert('Filter functionality would be implemented here. Status: ' + statusText + ', Month: ' + monthText + ', Year: ' + yearText);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Set today's date as default for the add form
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.querySelector('input[name="date"]');
+    if (dateInput && !dateInput.value) {
+        dateInput.value = today;
+    }
+
+    // Initialize all modals properly
+    var modals = document.querySelectorAll('.modal');
+    modals.forEach(function(modal) {
+        modal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var modal = this;
+        });
+    });
+
+    // Check if we have a success message in URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('success') === 'true') {
+        // Show success message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            <i class="bi bi-check-circle-fill me-2"></i>
+            Expense created successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.querySelector('.row').prepend(alertDiv);
+
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Check for error messages
+    if (urlParams.get('error')) {
+        // Show error message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            There was a problem creating the expense. Please try again.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.querySelector('.row').prepend(alertDiv);
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
+</script>
+{% endblock %}

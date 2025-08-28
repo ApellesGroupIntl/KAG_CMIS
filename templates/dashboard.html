@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}KAG MT. KENYA WEST DISTRICT - Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-speedometer2"></i> Dashboard</h1>
+    <div>
+        <a href="{% url 'USSD_CORE:transaction_list' %}" class="btn btn-primary">
+            <i class="bi bi-list-ul"></i> View All Transactions
+        </a>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Transactions</h5>
+                <h2 class="card-text">{{ total_transactions|intcomma }}</h2>
+                <p class="card-text"><small>All time</small></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Total Amount</h5>
+                <h2 class="card-text">Ksh {{ total_amount|floatformat:2|intcomma }}</h2>
+                <p class="card-text"><small>All time</small></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">This Month</h5>
+                <h2 class="card-text">Ksh {{ monthly_amount|floatformat:2|intcomma }}</h2>
+                <p class="card-text"><small>{{ monthly_transactions|intcomma }} transactions</small></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">This Week</h5>
+                <h2 class="card-text">Ksh {{ weekly_amount|floatformat:2|intcomma }}</h2>
+                <p class="card-text"><small>{{ weekly_transactions|intcomma }} transactions</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transaction Types -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Top Transaction Types</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th class="text-end">Count</th>
+                                <th class="text-end">Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for type in transaction_types %}
+                            <tr>
+                                <td>{{ type.Txn_type }}</td>
+                                <td class="text-end">{{ type.count|intcomma }}</td>
+                                <td class="text-end">Ksh {{ type.total|floatformat:2|intcomma }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'USSD_CORE:ussd-home' %}" class="btn btn-outline-primary">
+                        <i class="bi bi-phone"></i> USSD Platform Info
+                    </a>
+                    <a href="{% url 'USSD_CORE:transaction_list' %}?source=local" class="btn btn-outline-success">
+                        <i class="bi bi-building"></i> View Local Church Transactions
+                    </a>
+                    <a href="{% url 'USSD_CORE:transaction_list' %}?source=section" class="btn btn-outline-warning">
+                        <i class="bi bi-diagram-3"></i> View Section Transactions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

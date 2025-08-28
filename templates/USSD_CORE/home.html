@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}FLC Thika - USSD Core{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="h4 mb-0"><i class="bi bi-phone"></i> USSD Giving Platform</h2>
+            </div>
+            <div class="card-body">
+                <p class="lead">This module handles all incoming USSD transactions for church offerings, tithes, and other payments.</p>
+
+                <div class="row mt-5">
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <h3 class="h5">For Members</h3>
+                                <p class="text-muted">Give your offerings and tithes directly via USSD.</p>
+                                <hr>
+                                <p><strong>USSD Code:</strong> <code>*384*303#</code></p>
+                                <p class="mb-1"><strong>Options:</strong></p>
+                                <ul class="list-unstyled small">
+                                    <li>1. Give an Offering</li>
+                                    <li>2. Pay your Tithe</li>
+                                    <li>3. Mission Offering</li>
+                                    <li>4. Support Church Expenses</li>
+                                    <li>5. Big Day Giving</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-body text-center">
+                                <h3 class="h5">For Section Leaders</h3>
+                                <p class="text-muted">Update section offerings, tithes, and attendance.</p>
+                                <hr>
+                                <p><strong>USSD Code:</strong> <code>*384*202#</code></p>
+                                <p class="mb-1"><strong>Options:</strong></p>
+                                <ul class="list-unstyled small">
+                                    <li>1. Update Offerings</li>
+                                    <li>2. Update Tithe</li>
+                                    <li>3. Update Mission Offering</li>
+                                    <li>4. Update Expenses</li>
+                                    <li>5. Update Attendance</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{% url 'USSD_CORE:transaction_list' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-list-check"></i> View All Transactions
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
